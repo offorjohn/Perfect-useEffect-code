@@ -1,0 +1,286 @@
+/* eslint-disable react/no-danger */
+import * as React from 'react';
+import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
+
+import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
+import Tabs from '@mui/material/Tabs';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import AppBar from '@mui/material/AppBar';
+import Button from '@mui/material/Button';
+import TableRow from '@mui/material/TableRow';
+import { useTheme } from '@mui/material/styles';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableHead from '@mui/material/TableHead';
+import Typography from '@mui/material/Typography';
+import TableContainer from '@mui/material/TableContainer';
+import TablePagination from '@mui/material/TablePagination';
+
+function TabPanel(props) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <Typography
+      component="div"
+      role="tabpanel"
+      hidden={value !== index}
+      id={`action-tabpanel-${index}`}
+      aria-labelledby={`action-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </Typography>
+  );
+}
+
+TabPanel.propTypes = {
+  children: PropTypes.node,
+  index: PropTypes.number.isRequired,
+  value: PropTypes.number.isRequired,
+};
+
+function a11yProps(index) {
+  return {
+    id: `action-tab-${index}`,
+    'aria-controls': `action-tabpanel-${index}`,
+  };
+}
+
+export default function FloatingActionButtonZoom() {
+  const theme = useTheme();
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
+
+  const [page, setPage] = React.useState(0);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
+
+  // eslint-disable-next-line no-unused-vars
+  const fabs = [
+    // Define your FAB buttons here if needed
+  ];
+
+  // State and useEffect for the first table (Instant Numbers)
+  const [instantUsers, setInstantUsers] = useState([]);
+
+  useEffect(() => {
+    fetch('https://raw.githubusercontent.com/offorjohn/jon.json/main/.json')
+      .then((response) => response.json())
+      .then((json) => {
+        const usersWithId = json.data.map((user, index) => ({
+          id: index + 1,
+          ...user,
+        }));
+        setInstantUsers(usersWithId);
+      });
+  }, []);
+
+  const instantColumns = [
+    { id: 'number', label: 'Number', minWidth: 170 },
+    { id: 'message', label: 'Message', minWidth: 100 },
+    { id: 'otp', label: 'OTP', minWidth: 100 },
+    { id: 'sender', label: 'Sender', minWidth: 100 },
+    { id: 'receiver', label: 'Receiver', minWidth: 100 },
+    { id: 'messagedate', label: 'Message Date', minWidth: 100, align: 'right' },
+  ];
+
+  const instantRows = instantUsers
+    .map((user) => ({
+      id: user.id,
+      number: user.number,
+      message: user.message,
+      otp: user.otp,
+      sender: user.sender,
+      receiver: user.receiver,
+      messagedate: new Date(user.messagedate).toLocaleDateString(), // Convert to readable date format
+    }))
+    .sort((a, b) => new Date(a.messagedate) - new Date(b.messagedate)); // Sort by date
+
+  // State and useEffect for the second table (Dedicated Numbers)
+  const [dedicatedUsers, setDedicatedUsers] = useState([]);
+
+  useEffect(() => {
+    fetch('https://raw.githubusercontent.com/offorjohn/json/master/jon.json')
+      .then((response) => response.json())
+      .then((json) => {
+        const usersWithId = json.data.map((user, index) => ({
+          id: index + 1,
+          ...user,
+        }));
+        setDedicatedUsers(usersWithId);
+      });
+  }, []);
+
+  const dedicatedColumns = [
+    { id: 'description', label: 'Description', minWidth: 170 },
+    { id: 'status', label: 'Status', minWidth: 100 },
+    { id: 'amount', label: 'Amount', minWidth: 100, align: 'right' },
+    { id: 'reference', label: 'Reference', minWidth: 100 },
+    { id: 'paymentmessage', label: 'Payment Message', minWidth: 100 },
+    { id: 'paymentdate', label: 'Payment Date', minWidth: 100, align: 'right' },
+  ];
+
+  const dedicatedRows = dedicatedUsers
+    .map((user) => ({
+      id: user.id,
+      description: user.description,
+      status: user.status,
+      amount: user.amount,
+      reference: user.reference,
+      paymentmessage: user.paymentmessage,
+      paymentdate: new Date(user.paymentdate).toLocaleDateString(), // Convert to readable date format
+    }))
+    .sort((a, b) => new Date(a.paymentdate) - new Date(b.paymentdate)); // Sort by date
+
+  return (
+    <>
+      {/* Button outside of the Box */}
+      <Button
+        variant="contained"
+        color="primary"
+        sx={{
+          marginBottom: -1,
+          width: '150px',
+          marginLeft: '100px',
+         // Ensures the button is treated as a block element for alignment
+         
+        }}
+      >
+        Numbers
+      </Button>
+
+      <Box
+        sx={{
+          bgcolor: 'background.paper',
+          width: '100%',
+          maxWidth: 800,
+          position: 'relative',
+          minHeight: 600,
+          margin: '40px auto',
+
+        }}
+      >
+        <AppBar position="static" color="default">
+          <Tabs
+            value={value}
+            onChange={handleChange}
+            indicatorColor="primary"
+            textColor="primary"
+            variant="fullWidth"
+            aria-label="action tabs example"
+          >
+            <Tab label="Instant Numbers" {...a11yProps(0)} />
+            <Tab label="Dedicated Numbers" {...a11yProps(1)} />
+          </Tabs>
+        </AppBar>
+
+        <TabPanel value={value} index={0} dir={theme.direction}>
+          <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+            <TableContainer sx={{ maxHeight: 440 }}>
+              <Table stickyHeader aria-label="sticky table">
+                <TableHead>
+                  <TableRow>
+                    {instantColumns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        align={column.align}
+                        style={{ minWidth: column.minWidth }}
+                      >
+                        {column.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {instantRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                        <TableCell>{row.number}</TableCell>
+                        <TableCell>{row.message}</TableCell>
+                        <TableCell>{row.otp}</TableCell>
+                        <TableCell>{row.sender}</TableCell>
+                        <TableCell>{row.receiver}</TableCell>
+                        <TableCell align="right">
+                          {row.messagedate}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 100]}
+              component="div"
+              count={instantRows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Paper>
+        </TabPanel>
+
+        <TabPanel value={value} index={1} dir={theme.direction}>
+          <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+            <TableContainer sx={{ maxHeight: 440 }}>
+              <Table stickyHeader aria-label="sticky table">
+                <TableHead>
+                  <TableRow>
+                    {dedicatedColumns.map((column) => (
+                      <TableCell
+                        key={column.id}
+                        align={column.align}
+                        style={{ minWidth: column.minWidth }}
+                      >
+                        {column.label}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {dedicatedRows
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                        <TableCell>{row.description}</TableCell>
+                        <TableCell>{row.status}</TableCell>
+                        <TableCell align="right">{row.amount}</TableCell>
+                        <TableCell>{row.reference}</TableCell>
+                        <TableCell>{row.paymentmessage}</TableCell>
+                        <TableCell align="right">{row.paymentdate}</TableCell>
+                      </TableRow>
+                    ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+            <TablePagination
+              rowsPerPageOptions={[10, 25, 100]}
+              component="div"
+              count={dedicatedRows.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </Paper>
+        </TabPanel>
+      </Box>
+    </>
+  );
+}
